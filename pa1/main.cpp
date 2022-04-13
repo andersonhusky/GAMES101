@@ -71,7 +71,7 @@ Eigen::Matrix4f get_rotation(Vector3f axis, float angle)
 Eigen::Matrix4f get_model_matrix(float rotation_angle)
 {
     Eigen::Matrix4f m;
-    Vector3f axis{0, 0, 1};
+    Vector3f axis{1, 1, 1};
     Eigen::Matrix4f t;
     t << 1, 0, 0, 0,
             0, 1, 0, 0,
@@ -97,22 +97,35 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
                     
     // TODO: Implement this function
     // Create the projection matrix for the given parameters.
-    // Then return it.
-    Eigen::Matrix4f Mpersp, MOtrtho, MP2O;
+    // Then return it
+    Eigen::Matrix4f Mpersp;
+    float fovY = eye_fov*PI/180.0;
+    float cota = 1.f/tanf(fovY/2);
+    float zD = zNear-zFar;
+    Mpersp << -cota/aspect_ratio, 0, 0, 0,
+                        0, -cota, 0, 0,
+                        0, 0, (zNear+zFar)/zD, -2*zNear*zFar/zD,
+                        0, 0, 1, 0;
 
-    float fovY = float(eye_fov)*PI/180.0;
-    float t = abs(zNear)*tan(fovY/2);
-    float r = t*aspect_ratio;
+    // Eigen::Matrix4f Mpersp, Mscale, Mtrans, MP2O;
+    // float fovY = eye_fov*PI/180.0;
+    // float t = abs(zNear)*tanf(fovY/2);
+    // float r = t*aspect_ratio;
 
-    MOtrtho << 1/r, 0, 0, 0,
-                            0, 1/t, 0, 0,
-                            0, 0, 2/(zFar-zNear), -(zFar+zNear)/2,
-                            0, 0, 0, 1;
-    MP2O << zNear, 0, 0, 0,
-                    0, zNear, 0, 0,
-                    0, 0, zNear+zFar, -zNear*zFar,
-                    0, 0, 1, 0;
-    Mpersp = MOtrtho*MP2O;
+    // Mscale << 1/r, 0, 0, 0,
+    //                         0, 1/t, 0, 0,
+    //                         0, 0, 2/(zNear-zFar), 0,
+    //                         0, 0, 0, 1;
+    // Mtrans << 1, 0, 0, 0,
+    //                     0, 1, 0, 0,
+    //                     0, 0, 1, -(zNear+zFar)/2,
+    //                     0, 0, 0, 1;
+    // MP2O << zNear, 0, 0, 0,
+    //                 0, zNear, 0, 0,
+    //                 0, 0, zNear+zFar, -zNear*zFar,
+    //                 0, 0, 1, 0;
+    // Mpersp = Mscale*Mtrans*MP2O;
+
     return Mpersp; 
 }
 
