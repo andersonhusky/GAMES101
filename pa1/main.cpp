@@ -71,7 +71,7 @@ Eigen::Matrix4f get_rotation(Vector3f axis, float angle)
 Eigen::Matrix4f get_model_matrix(float rotation_angle)
 {
     Eigen::Matrix4f m;
-    Vector3f axis{1, 0, 0};
+    Vector3f axis{0, 0, 1};
     Eigen::Matrix4f t;
     t << 1, 0, 0, 0,
             0, 1, 0, 0,
