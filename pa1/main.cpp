@@ -3,6 +3,7 @@
 #include <eigen3/Eigen/Eigen>
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include "kbhit.cpp"
 
 constexpr double PI = 3.1415926;
 
@@ -51,71 +52,68 @@ Eigen::Matrix4f toMatrix4f(Eigen::Matrix3f m)
     tRet.row(3) = (Vector4f){0,0,0,1};
     return tRet;
 }
+
+// 角轴转换为旋转矩阵
 Eigen::Matrix4f get_rotation(Vector3f axis, float angle)
 {
-    Eigen::Matrix3f I = Eigen::Matrix3f::Identity();
-    Eigen::Matrix3f N;
-    float a = angle/180.0f*PI;
-    float c = cosf(a),s = sinf(a);
-    Vector3f n = axis.normalized();
-    N << 0,     -n.z(),  n.y(),
-         n.z(),  0,     -n.x(),
-        -n.y(), n.x(), 0;
-    //wikipedia的方法
-    return toMatrix4f(I + (N*N)*(1-c) + N*s);
-    //闫老师的方法 n*n^t
-    //return toMatrix4f(c*I + (1-c)*(n*n.transpose()) + s*N);
+    float a = angle*PI/180.0;
+    float cosa = cosf(a), sina = sinf(a);
+    Eigen::Matrix3f  I = Eigen::Matrix3f::Identity();
+    axis = axis.normalized();
+    Eigen::Matrix3f nhat;
+    nhat << 0, -axis.z(), axis.y(),
+                axis.z(), 0, -axis.x(),
+                -axis.y(), axis.x(), 0;
+    return toMatrix4f(I + (nhat*nhat)*(1-cosa) + sina*nhat);
+    // return toMatrix4f(cosa*I + (1-cosa)*(axis*axis.transpose()) + sina*nhat);
 }
+
 Eigen::Matrix4f get_model_matrix(float rotation_angle)
 {
-    Eigen::Vector3f z = {0,1,0};
+    Eigen::Matrix4f m;
+    Vector3f axis{1, 0, 0};
     Eigen::Matrix4f t;
     t << 1, 0, 0, 0,
-                0, 1, 0, -0.5,
-                0, 0, 1,-2,
-                0, 0, 0, 1;
-    auto r = get_rotation(z,rotation_angle);
-    
-    return t * r ;
-    Eigen::Matrix4f model = Eigen::Matrix4f::Identity();
-    float a = rotation_angle/180.0f*PI;
-    float c = cosf(a),s = sinf(a);
-    model << c,-s,0,0,
-             s, c,0,0,
-             0, 0,1,0,
-             0, 0,0,1;
-    return model;
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1;
+    m = get_rotation(axis, rotation_angle);
+    return m*t;
+
+    // Eigen::Matrix4f m;
+    // float angle = rotation_angle/180.0f * PI;
+    // float c = cosf(angle),s = sinf(angle);
+    // m << c, -s, 0, 0,
+    //     s, c, 0, 0,
+    //     0, 0, 1, 0,
+    //     0, 0, 0, 1;
+    // return m;
 }
 
 Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
                                       float zNear, float zFar)
 {
     // Students will implement this function
-
-    Eigen::Matrix4f projection = Eigen::Matrix4f::Identity();
-    float cota = eye_fov / 180.0f * 3.1415926f * 0.5f ;
-    cota = 1.f/ tanf(cota);
-    //右手坐标系
-    float zD = zNear-zFar;
-    projection <<   -cota/aspect_ratio,0,0,0,
-                    0,-cota,0,0,
-                    0,0,(zFar+zNear)/zD,-2.0f*zFar*zNear/zD,
-                    0,0,1,0;
-    
-    //左手坐标系
-//    projection <<   cota/aspect_ratio,0,0,0,
-//                    0,cota,0,0,
-//                    0,0,(zFar+zNear)/(zFar-zNear),-2.0f*zFar*zNear/(zFar-zNear),
-//                    0,0,1,0;
                     
     // TODO: Implement this function
     // Create the projection matrix for the given parameters.
     // Then return it.
-//    projection <<   0.2,0,0,0,
-//                    0,0.2,0,0,
-//                    0,0,-0.5,0.5,
-//                    0,0,0,1;
-    return projection;
+    Eigen::Matrix4f Mpersp, MOtrtho, MP2O;
+
+    float fovY = float(eye_fov)*PI/180.0;
+    float t = abs(zNear)*tan(fovY/2);
+    float r = t*aspect_ratio;
+
+    MOtrtho << 1/r, 0, 0, 0,
+                            0, 1/t, 0, 0,
+                            0, 0, 2/(zFar-zNear), -(zFar+zNear)/2,
+                            0, 0, 0, 1;
+    MP2O << zNear, 0, 0, 0,
+                    0, zNear, 0, 0,
+                    0, 0, zNear+zFar, -zNear*zFar,
+                    0, 0, 1, 0;
+    Mpersp = MOtrtho*MP2O;
+    return Mpersp; 
 }
 
 int main(int argc, const char** argv)
@@ -124,6 +122,7 @@ int main(int argc, const char** argv)
     bool command_line = false;
     std::string filename = "output.png";
 
+    // 命令行输入的第三个为旋转角度，第四个为存储的图片名
     if (argc >= 3) {
         command_line = true;
         angle = std::stof(argv[2]); // -r by default
@@ -172,31 +171,18 @@ int main(int argc, const char** argv)
         r.set_projection(get_projection_matrix(45, 1, -0.1, -50));
 
         r.draw(pos_id, ind_id, rst::Primitive::Triangle);
-//        Eigen::Vector3f red (255.0f,0.0f,0.0f);
-//        Eigen::Vector3f center(100,100,0);
-//        for(int i  =0;i<10;++i){
-//            for(int j = 0;j<10;++j)
-//            {
-//                Eigen::Vector3f p = center;
-//                p.x() = p.x() + i;
-//                p.y() = p.y() + j;
-//                r.set_pixel(p,red );
-//            }
-//        }
         
         cv::Mat image(700, 700, CV_32FC3, r.frame_buffer().data());
         
         image.convertTo(image, CV_8UC3, 1.0f);
         cv::imshow("image", image);
         key = cv::waitKey(10);
-
-        //std::cout << "frame count: " << frame_count++ << '\n';
-
-        if (key == 'a') {
-            angle += 10;
-        }
-        else if (key == 'd') {
-            angle -= 10;
+        
+        //  AD旋转
+        if(kbhit()){
+            char action = getchar();
+            if(action=='A') angle += 3;
+            else if(action=='D')    angle -=3;
         }
     }
 

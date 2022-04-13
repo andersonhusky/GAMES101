@@ -73,19 +73,25 @@ class rasterizer
     void rasterize_wireframe(const Triangle& t);
 
   private:
+    // 三个变换矩阵
     Eigen::Matrix4f model;
     Eigen::Matrix4f view;
     Eigen::Matrix4f projection;
 
+    // 位置队列（三角形点的位置）和序号队列（三角形三个点的序号）
     std::map<int, std::vector<Eigen::Vector3f>> pos_buf;
     std::map<int, std::vector<Eigen::Vector3i>> ind_buf;
 
+    // 两个在rasterizer初始化的时候被创建，大小为初始化时传入的参数
+    // 帧缓冲对象，存储需要在屏幕上绘制的颜色数据
     std::vector<Eigen::Vector3f> frame_buf;
+    // 深度缓冲对象
     std::vector<float> depth_buf;
     int get_index(int x, int y);
 
     int width, height;
 
+    // 记录当前id
     int next_id = 0;
     int get_next_id() { return next_id++; }
 };
