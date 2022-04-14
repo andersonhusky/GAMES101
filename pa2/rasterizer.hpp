@@ -70,8 +70,8 @@ namespace rst
 
         void set_pixel(const Eigen::Vector3f& point, const Eigen::Vector3f& color);
         void set_pixel(float x ,float y, const Eigen::Vector3f& color);
-        void set_depth(float x ,float y, float depth);
-        float get_depth(float x,float y);
+        void set_depth(int x ,int y, float depth, int num);
+        float get_depth(int x,int y, int num);
         void clear(Buffers buff);
 
         void draw(pos_buf_id pos_buffer, ind_buf_id ind_buffer, col_buf_id col_buffer, Primitive type);

@@ -50,32 +50,43 @@ Eigen::Matrix4f get_model_matrix(float rotation_angle)
     return model;
 }
 
-Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio, float zNear, float zFar)
+Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
+                                      float zNear, float zFar)
 {
-    Eigen::Matrix4f projection = Eigen::Matrix4f::Identity();
-    float cota = eye_fov / 180.0f * 3.1415926f * 0.5f ;
-    cota = 1.f/ tanf(cota);
-    //右手坐标系
-    float zD = zNear-zFar;
-    projection <<   -cota/aspect_ratio,0,0,0,
-                    0,-cota,0,0,
-                    0,0,(zFar+zNear)/zD,-2.0f*zFar*zNear/zD,
-                    0,0,1,0;
-    
-    //左手坐标系
-//    projection <<   cota/aspect_ratio,0,0,0,
-//                    0,cota,0,0,
-//                    0,0,(zFar+zNear)/(zFar-zNear),-2.0f*zFar*zNear/(zFar-zNear),
-//                    0,0,1,0;
+    // Students will implement this function
                     
     // TODO: Implement this function
     // Create the projection matrix for the given parameters.
-    // Then return it.
-//    projection <<   0.2,0,0,0,
-//                    0,0.2,0,0,
-//                    0,0,-0.5,0.5,
-//                    0,0,0,1;
-    return projection;
+    // Then return it
+    Eigen::Matrix4f Mpersp;
+    float fovY = eye_fov*MY_PI/180.0;
+    float cota = 1.f/tanf(fovY/2);
+    float zD = zNear-zFar;
+    Mpersp << -cota/aspect_ratio, 0, 0, 0,
+                        0, -cota, 0, 0,
+                        0, 0, (zNear+zFar)/zD, -2*zNear*zFar/zD,
+                        0, 0, 1, 0;
+
+    // Eigen::Matrix4f Mpersp, Mscale, Mtrans, MP2O;
+    // float fovY = eye_fov*PI/180.0;
+    // float t = abs(zNear)*tanf(fovY/2);
+    // float r = t*aspect_ratio;
+
+    // Mscale << 1/r, 0, 0, 0,
+    //                         0, 1/t, 0, 0,
+    //                         0, 0, 2/(zNear-zFar), 0,
+    //                         0, 0, 0, 1;
+    // Mtrans << 1, 0, 0, 0,
+    //                     0, 1, 0, 0,
+    //                     0, 0, 1, -(zNear+zFar)/2,
+    //                     0, 0, 0, 1;
+    // MP2O << zNear, 0, 0, 0,
+    //                 0, zNear, 0, 0,
+    //                 0, 0, zNear+zFar, -zNear*zFar,
+    //                 0, 0, 1, 0;
+    // Mpersp = Mscale*Mtrans*MP2O;
+
+    return Mpersp; 
 }
 
 int main(int argc, const char** argv)
