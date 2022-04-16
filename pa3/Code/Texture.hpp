@@ -40,8 +40,8 @@ public:
         float s = u_img-u_d;
         float t = v_u-v_img;
 
-        auto u0 = (1-s)*image_data.at<cv::Vec3b>(v_u, u_d) + s*image_data.at<cv::Vec3b>(v_d, u_d);
-        auto u1 = (1-s)*image_data.at<cv::Vec3b>(v_u, u_u) + s*image_data.at<cv::Vec3b>(v_d, u_u);
+        auto u0 = (1-s)*image_data.at<cv::Vec3b>(v_u, u_d) + s*image_data.at<cv::Vec3b>(v_u, u_u);
+        auto u1 = (1-s)*image_data.at<cv::Vec3b>(v_d, u_d) + s*image_data.at<cv::Vec3b>(v_d, u_u);
         auto color = (1-t)*u0 + t*u1;
         return Eigen::Vector3f(color[0], color[1], color[2]);
     }
