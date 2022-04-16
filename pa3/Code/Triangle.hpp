@@ -28,6 +28,9 @@ public:
     void setVertex(int ind, Vector4f ver); /*set i-th vertex coordinates */
     void setNormal(int ind, Vector3f n); /*set i-th vertex normal vector*/
     void setColor(int ind, float r, float g, float b); /*set i-th vertex color*/
+    Vector3f getNormal(int ind) const {return normal[ind];}        // 返回第i个点的法向量
+    Vector3f getColor(int ind) const {return color[ind];}       // 返回第i个点的像素值
+    Vector2f getTexCoord(int ind) const {return tex_coords[ind];} // 返回第i个点的纹理坐标
 
     void setNormals(const std::array<Vector3f, 3>& normals);
     void setColors(const std::array<Vector3f, 3>& colors);

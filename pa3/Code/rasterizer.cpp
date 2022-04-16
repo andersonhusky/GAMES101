@@ -163,6 +163,7 @@ static bool insideTriangle(int x, int y, const Vector4f* _v){
     return false;
 }
 
+// 计算任意xy在三角形内有三角形三个点标出时的[alpha, beta, gamma]系数
 static std::tuple<float, float, float> computeBarycentric2D(float x, float y, const Vector4f* v){
     float c1 = (x*(v[1].y() - v[2].y()) + (v[2].x() - v[1].x())*y + v[1].x()*v[2].y() - v[2].x()*v[1].y()) / (v[0].x()*(v[1].y() - v[2].y()) + (v[2].x() - v[1].x())*v[0].y() + v[1].x()*v[2].y() - v[2].x()*v[1].y());
     float c2 = (x*(v[2].y() - v[0].y()) + (v[0].x() - v[2].x())*y + v[2].x()*v[0].y() - v[0].x()*v[2].y()) / (v[1].x()*(v[2].y() - v[0].y()) + (v[0].x() - v[2].x())*v[1].y() + v[2].x()*v[0].y() - v[0].x()*v[2].y());
@@ -176,34 +177,40 @@ void rst::rasterizer::draw(std::vector<Triangle *> &TriangleList) {
     float f2 = (50 + 0.1) / 2.0;
 
     Eigen::Matrix4f mvp = projection * view * model;
+    // 遍历三角形
     for (const auto& t:TriangleList)
     {
         Triangle newtri = *t;
 
+        // 透视投影前三个顶点坐标
         std::array<Eigen::Vector4f, 3> mm {
                 (view * model * t->v[0]),
                 (view * model * t->v[1]),
                 (view * model * t->v[2])
         };
 
+        // 取mm每个点的前三个给viewspace_pos
         std::array<Eigen::Vector3f, 3> viewspace_pos;
 
         std::transform(mm.begin(), mm.end(), viewspace_pos.begin(), [](auto& v) {
             return v.template head<3>();
         });
 
+        // 三角形三个顶点的透视投影
         Eigen::Vector4f v[] = {
                 mvp * t->v[0],
                 mvp * t->v[1],
                 mvp * t->v[2]
         };
         //Homogeneous division
+        // 除去第四位得到投影后坐标[x,y,z,1]
         for (auto& vec : v) {
             vec.x()/=vec.w();
             vec.y()/=vec.w();
             vec.z()/=vec.w();
         }
 
+        // 反变换，这里求的n是法向量？
         Eigen::Matrix4f inv_trans = (view * model).inverse().transpose();
         Eigen::Vector4f n[] = {
                 inv_trans * to_vec4(t->normal[0], 0.0f),
@@ -212,6 +219,7 @@ void rst::rasterizer::draw(std::vector<Triangle *> &TriangleList) {
         };
 
         //Viewport transformation
+        // 转换到像素平面
         for (auto & vert : v)
         {
             vert.x() = 0.5*width*(vert.x()+1.0);
@@ -219,23 +227,28 @@ void rst::rasterizer::draw(std::vector<Triangle *> &TriangleList) {
             vert.z() = vert.z() * f1 + f2;
         }
 
+        // 设置顶点，转化后在像素平面上
         for (int i = 0; i < 3; ++i)
         {
             //screen space coordinates
             newtri.setVertex(i, v[i]);
         }
 
+        // 设置法向量
         for (int i = 0; i < 3; ++i)
         {
             //view space normal
             newtri.setNormal(i, n[i].head<3>());
         }
 
+        // 设置颜色
         newtri.setColor(0, 148,121.0,92.0);
         newtri.setColor(1, 148,121.0,92.0);
         newtri.setColor(2, 148,121.0,92.0);
 
         // Also pass view space vertice position
+        // newtri为经过透视投影后，即缩放空间内的坐标
+        // viewspace_pos为未透视投影前，即在为缩放空间内的坐标
         rasterize_triangle(newtri, viewspace_pos);
     }
 }
@@ -260,27 +273,105 @@ static Eigen::Vector2f interpolate(float alpha, float beta, float gamma, const E
 void rst::rasterizer::rasterize_triangle(const Triangle& t, const std::array<Eigen::Vector3f, 3>& view_pos) 
 {
     // TODO: From your HW3, get the triangle rasterization code.
-    // TODO: Inside your rasterization loop:
-    //    * v[i].w() is the vertex view space depth value z.
-    //    * Z is interpolated view space depth for the current pixel
-    //    * zp is depth between zNear and zFar, used for z-buffer
+    auto v = t.toVector4();
+    int boundingBox[4];
+    boundingBox[0] = std::floor(std::min(std::min(t.v[0][0], t.v[1][0]), t.v[2][0]));
+    boundingBox[1] = std::floor(std::min(std::min(t.v[0][1], t.v[1][1]), t.v[2][1]));
+    boundingBox[2] = std::ceil(std::max(std::max(t.v[0][0], t.v[1][0]), t.v[2][0]));
+    boundingBox[3] = std::ceil(std::max(std::max(t.v[0][1], t.v[1][1]), t.v[2][1]));
+    
+    // super-sampling 2*2
+    bool MSAA = false;                                                                                                           //Multi-sample Anti-Aliasing（MSAA）
+    if(MSAA){
+        std::vector<Eigen::Vector2f> pos{{0.25, 0.25}, {0.25, 0.75}, {0.75, 0.25}, {0.75, 0.75}};
+        for(int i=boundingBox[0]; i<=boundingBox[2]; ++i)
+        {
+            for(int j=boundingBox[1]; j<=boundingBox[3]; ++j)
+            {
+                float count=0;
+                std::vector<float> samplelist(4, FLT_MAX);
+                for(int k=0; k<4; k++)
+                {
+                    if(insideTriangle(float(i)+pos[k][0], float(j)+pos[k][1], t.v)){
+                        auto[alpha, beta, gamma] = computeBarycentric2D(float(i)+pos[k][0], float(j)+pos[k][1], t.v);
+                        float w_reciprocal = 1.0/(alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
+                        float z_interpolated = alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() + gamma * v[2].z() / v[2].w();
+                        z_interpolated *= w_reciprocal;
+                        samplelist[k] = z_interpolated;
+                        ++count;
+                    }
+                }
 
-    // float Z = 1.0 / (alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
-    // float zp = alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() + gamma * v[2].z() / v[2].w();
-    // zp *= Z;
+                int num=0;
+                for(int k=0; k<4; k++)
+                {
+                    if(samplelist[k] < get_depth(i, j, k)){
+                        ++num;
+                        set_depth(i, j, samplelist[k], k);
+                    }
+                }
+                if(num>=2){
+                    auto[alpha, beta, gamma] = computeBarycentric2D(float(i)+0.5, float(j)+0.5, t.v);
+                    Eigen::Vector3f interpolated_color = interpolate(alpha, beta, gamma, t.getColor(0), t.getColor(1), t.getColor(2), 1);
+                    Eigen::Vector3f interpolated_normal = interpolate(alpha, beta, gamma, t.getNormal(0), t.getNormal(1), t.getNormal(2), 1);
+                    Eigen::Vector2f interpolated_texcoords = interpolate(alpha, beta, gamma, t.getTexCoord(0), t.getTexCoord(1), t.getTexCoord(2), 1);
+                    Eigen::Vector3f interpolated_shadingcoords = interpolate(alpha, beta, gamma, view_pos[0], view_pos[1], view_pos[2], 1);
 
-    // TODO: Interpolate the attributes:
-    // auto interpolated_color
-    // auto interpolated_normal
-    // auto interpolated_texcoords
-    // auto interpolated_shadingcoords
+                    fragment_shader_payload payload( interpolated_color, interpolated_normal.normalized(), interpolated_texcoords, texture ? &*texture : nullptr);
+                    payload.view_pos = interpolated_shadingcoords;
+                    Eigen::Vector3f pixel_color = fragment_shader(payload);
+                    set_pixel(i, j, pixel_color*count/4.0);
+                }
+            }
+        }
+    }
+    else{
+        for(int i=boundingBox[0]; i<=boundingBox[2]; i++)
+        {
+            for(int j=boundingBox[1]; j<=boundingBox[3]; j++)
+            {
+                if(insideTriangle(float(i)+0.5, float(j)+0.5, t.v)){
+                    // 给的深度插值
+                    // TODO: Inside your rasterization loop:
+                    //    * v[i].w() is the vertex view space depth value z.
+                    //    * Z is interpolated view space depth for the current pixel
+                    //    * zp is depth between zNear and zFar, used for z-buffer
 
+                    // float Z = 1.0 / (alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
+                    // float zp = alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() + gamma * v[2].z() / v[2].w();
+                    // zp *= Z;
+                    auto[alpha, beta, gamma] = computeBarycentric2D(float(i)+0.5, float(j)+0.5, t.v);
+
+                    float w_reciprocal = 1.0/(alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
+                    float z_interpolated = alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() + gamma * v[2].z() / v[2].w();
+                    z_interpolated *= w_reciprocal;
+
+                    if(z_interpolated < get_depth(i, j, 0)){
+                        // TODO: Interpolate the attributes:
+                        // auto interpolated_color
+                        // auto interpolated_normal
+                        // auto interpolated_texcoords
+                        // auto interpolated_shadingcoords
+                        Eigen::Vector3f interpolated_color = interpolate(alpha, beta, gamma, t.getColor(0), t.getColor(1), t.getColor(2), 1);
+                        Eigen::Vector3f interpolated_normal = interpolate(alpha, beta, gamma, t.getNormal(0), t.getNormal(1), t.getNormal(2), 1);
+                        Eigen::Vector2f interpolated_texcoords = interpolate(alpha, beta, gamma, t.getTexCoord(0), t.getTexCoord(1), t.getTexCoord(2), 1);
+                        Eigen::Vector3f interpolated_shadingcoords = interpolate(alpha, beta, gamma, view_pos[0], view_pos[1], view_pos[2], 1);
+
+                        fragment_shader_payload payload( interpolated_color, interpolated_normal.normalized(), interpolated_texcoords, texture ? &*texture : nullptr);
+                        payload.view_pos = interpolated_shadingcoords;
+                        Eigen::Vector3f pixel_color = fragment_shader(payload);
+                        set_pixel(i, j, pixel_color);
+                        set_depth(i, j, z_interpolated, 0);
+                    }
+                }
+            }
+        }
+    }
+    return;
     // Use: fragment_shader_payload payload( interpolated_color, interpolated_normal.normalized(), interpolated_texcoords, texture ? &*texture : nullptr);
     // Use: payload.view_pos = interpolated_shadingcoords;
     // Use: Instead of passing the triangle's color directly to the frame buffer, pass the color to the shaders first to get the final color;
     // Use: auto pixel_color = fragment_shader(payload);
-
- 
 }
 
 void rst::rasterizer::set_model(const Eigen::Matrix4f& m)
@@ -313,7 +404,7 @@ void rst::rasterizer::clear(rst::Buffers buff)
 rst::rasterizer::rasterizer(int w, int h) : width(w), height(h)
 {
     frame_buf.resize(w * h);
-    depth_buf.resize(w * h);
+    depth_buf.resize(w * h * AA * AA);
 
     texture = std::nullopt;
 }
@@ -330,6 +421,12 @@ void rst::rasterizer::set_pixel(const Vector2i &point, const Eigen::Vector3f &co
     frame_buf[ind] = color;
 }
 
+void rst::rasterizer::set_pixel(float x ,float y, const Eigen::Vector3f& color)
+{
+    auto ind = (height-1-y)*width + (x);
+    frame_buf[ind] = color;
+}
+
 void rst::rasterizer::set_vertex_shader(std::function<Eigen::Vector3f(vertex_shader_payload)> vert_shader)
 {
     vertex_shader = vert_shader;
@@ -340,3 +437,16 @@ void rst::rasterizer::set_fragment_shader(std::function<Eigen::Vector3f(fragment
     fragment_shader = frag_shader;
 }
 
+void rst::rasterizer::set_depth(int x ,int y, float depth, int num)
+{
+    assert(num>=0 && num<=3);
+    auto ind = y*height*AA*AA + x*AA*AA + num;
+    depth_buf[ind] = depth;
+}
+
+float rst::rasterizer::get_depth(int x, int y, int num)
+{
+    assert(num>=0 && num<=3);
+    auto ind = y*height*AA*AA + x *AA*AA + num;
+    return depth_buf[ind];
+}
