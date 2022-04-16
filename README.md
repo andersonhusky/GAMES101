@@ -16,4 +16,4 @@
 <img width="250" height="250" src="https://github.com/andersonhusky/GAMES101/blob/main/pa3/Code/Results/Cow/4Bump.png" alt="抗锯齿2"/>
 <img width="250" height="250" src="https://github.com/andersonhusky/GAMES101/blob/main/pa3/Code/Results/Cow/5Displacement.png" alt="抗锯齿2"/>  
 是否应用双线性插值结果对比如下
-<img width="400" height="800" src="https://github.com/andersonhusky/GAMES101/blob/main/pa3/Code/Results/Cow/compare.png" alt="抗锯齿2"/>  
+<img width="800" height="400" src="https://github.com/andersonhusky/GAMES101/blob/main/pa3/Code/Results/Cow/compare.png" alt="抗锯齿2"/>  
