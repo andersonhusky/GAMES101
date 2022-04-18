@@ -50,7 +50,7 @@ void bezier(const std::vector<cv::Point2f> &control_points, cv::Mat &window)
     {
         cv::Point2f bt = recursive_bezier(control_points, t);
         std::cout << bt.x << ", " << bt.y << std::endl;
-        window.at<cv::Vec3b>(bt.y, bt.x)[2] = 255;
+        window.at<cv::Vec3b>(bt.y, bt.x)[1] = 255;
     }
 }
 
@@ -94,11 +94,11 @@ int main()
         if (control_points.size() == 4) 
         {
             // naive_bezier(control_points, window);
-            // bezier(control_points, window);
-            bezier_anti_aliasing(control_points, window);
+            bezier(control_points, window);
+            // bezier_anti_aliasing(control_points, window);
 
             cv::imshow("Bezier Curve", window);
-            cv::imwrite("my_bezier_curve_anti_aliasing.png", window);
+            cv::imwrite("my_bezier_curve_without_anti_aliasing.png", window);
             key = cv::waitKey(0);
 
             return 0;
