@@ -18,4 +18,6 @@
 <img width="800" height="400" src="https://github.com/andersonhusky/GAMES101/blob/main/pa3/Code/Results/Cow/compare.png" alt="compare"/>  
 
 完成作业4： 贝塞尔曲线如下  
-<img width="600" height="600" src="https://github.com/andersonhusky/GAMES101/blob/main/pa4/code/my_bezier_curve.png" alt="besier curves"/>  
+<img width="500" height="500" src="https://github.com/andersonhusky/GAMES101/blob/main/pa4/code/my_bezier_curve.png" alt="besier curves"/>  
+是否应用反采样结果对比如下
+<img width="800" height="400" src="https://github.com/andersonhusky/GAMES101/blob/main/pa4/code/compare.png" alt="compare"/>  
