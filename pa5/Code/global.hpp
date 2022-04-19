@@ -31,6 +31,7 @@ inline bool solveQuadratic(const float& a, const float& b, const float& c, float
     return true;
 }
 
+// 材质：漫反射+光泽、反射和折射、反射
 enum MaterialType
 {
     DIFFUSE_AND_GLOSSY,

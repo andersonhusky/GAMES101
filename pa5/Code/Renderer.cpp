@@ -80,17 +80,21 @@ float fresnel(const Vector3f &I, const Vector3f &N, const float &ior)
 // \param[out] *hitObject stores the pointer to the intersected object (used to retrieve material information, etc.)
 // \param isShadowRay is it a shadow ray. We can return from the function sooner as soon as we have found a hit.
 // [/comment]
+// 光源、光照方向、物体向量
 std::optional<hit_payload> trace(
         const Vector3f &orig, const Vector3f &dir,
         const std::vector<std::unique_ptr<Object> > &objects)
 {
+    // tNear定义为无限远
     float tNear = kInfinity;
     std::optional<hit_payload> payload;
+    // 遍历物体
     for (const auto & object : objects)
     {
         float tNearK = kInfinity;
         uint32_t indexK;
         Vector2f uvK;
+        // 分别和两个球以及棋盘是否有相交，返回最近的相交结果
         if (object->intersect(orig, dir, tNearK, indexK, uvK) && tNearK < tNear)
         {
             payload.emplace();
@@ -121,10 +125,12 @@ std::optional<hit_payload> trace(
 // If the surface is diffuse/glossy we use the Phong illumation model to compute the color
 // at the intersection point.
 // [/comment]
+// 递归的Whitted-style光线追踪
 Vector3f castRay(
         const Vector3f &orig, const Vector3f &dir, const Scene& scene,
         int depth)
 {
+    // 光线弹射次数太多，返回空
     if (depth > scene.maxDepth) {
         return Vector3f(0.0,0.0,0.0);
     }
@@ -223,14 +229,15 @@ void Renderer::Render(const Scene& scene)
         for (int i = 0; i < scene.width; ++i)
         {
             // generate primary ray direction
-            float x;
-            float y;
+            // 光线在正交投影后立方体上的xy坐标
+            float n = abs(scene.height*0.5f/scale);
+            float x = (float(i)-float(scene.width)*0.5)/n;
+            float y = (float(scene.height-j)-float(scene.height)*0.5)/n;
             // TODO: Find the x and y positions of the current pixel to get the direction
             // vector that passes through it.
             // Also, don't forget to multiply both of them with the variable *scale*, and
-            // x (horizontal) variable with the *imageAspectRatio*            
-
-            Vector3f dir = Vector3f(x, y, -1); // Don't forget to normalize this direction!
+            // x (horizontal) variable with the *imageAspectRatio*
+            Vector3f dir = normalize(Vector3f(x, y, -1)); // Don't forget to normalize this direction!
             framebuffer[m++] = castRay(eye_pos, dir, scene, 0);
         }
         UpdateProgress(j / (float)scene.height);

@@ -28,6 +28,7 @@ public:
 
 private:
     // creating the scene (adding objects and lights)
+    // 场景中的物体和光源
     std::vector<std::unique_ptr<Object> > objects;
     std::vector<std::unique_ptr<Light> > lights;
 };
