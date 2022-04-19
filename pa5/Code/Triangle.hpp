@@ -21,7 +21,7 @@ bool rayTriangleIntersect(const Vector3f& v0, const Vector3f& v1, const Vector3f
     float t = dotProduct(S2, E2)/blow;
     float b1 = dotProduct(S1, S0)/blow;
     float b2 = dotProduct(S2, dir)/blow;
-    if(t>0.f && b1>0.f && b2>0.f && b1+b2<1.f){
+    if(t>=0.f && b1>=0.f && b2>=0.f && b1+b2<=1.f){
         tnear = t;
         u = b1;
         v = b2;
@@ -64,7 +64,6 @@ public:
             float t, u, v;
             if (rayTriangleIntersect(v0, v1, v2, orig, dir, t, u, v) && t < tnear)
             {
-                std::cout << 11 << std::endl;
                 tnear = t;
                 uv.x = u;
                 uv.y = v;

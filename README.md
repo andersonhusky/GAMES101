@@ -21,3 +21,5 @@
 <img width="500" height="500" src="https://github.com/andersonhusky/GAMES101/blob/main/pa4/code/my_bezier_curve.png" alt="besier curves"/>  
 是否应用反采样结果对比如下
 <img width="800" height="400" src="https://github.com/andersonhusky/GAMES101/blob/main/pa4/code/compare.png" alt="compare"/>  
+
+22/04/19 完成作业5：光线追踪结果如下
