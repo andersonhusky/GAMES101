@@ -230,16 +230,20 @@ void Renderer::Render(const Scene& scene)
         {
             // generate primary ray direction
             // 光线在正交投影后立方体上的xy坐标
+            // float x = float(i+0.5)*2.f/float(scene.width)-1.f;
+            // float y = float(scene.height-j-0.5)*2.f/float(scene.height)-1.f;
+            // x *= scale*imageAspectRatio;
+            // y *= scale;
             float n = abs(scene.height*0.5f/scale);
-            float x = (float(i)-float(scene.width)*0.5)/n;
-            float y = (float(scene.height-j)-float(scene.height)*0.5)/n;
+            float x = (float(i-0.5)-float(scene.width)*0.5)/n;
+            float y = (float(scene.height-j-0.5)-float(scene.height)*0.5)/n;
             // float x = (2.f*float(i)/float(scene.height) -imageAspectRatio)*scale;
             // float y = (2.f*float(scene.height-j)/float(scene.height) -1.f)*scale;
             // TODO: Find the x and y positions of the current pixel to get the direction
             // vector that passes through it.
             // Also, don't forget to multiply both of them with the variable *scale*, and
             // x (horizontal) variable with the *imageAspectRatio*
-            Vector3f dir = Vector3f(x, y, -1); // Don't forget to normalize this direction!
+            Vector3f dir = normalize(Vector3f(x, y, -1)); // Don't forget to normalize this direction!
             framebuffer[m++] = castRay(eye_pos, dir, scene, 0);
         }
         UpdateProgress(j / (float)scene.height);
