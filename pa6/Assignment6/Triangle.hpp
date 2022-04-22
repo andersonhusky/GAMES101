@@ -70,6 +70,10 @@ public:
     }
     Vector3f evalDiffuseColor(const Vector2f&) const override;
     Bounds3 getBounds() override;
+    void setIntersection(Intersection& inter, int u, int v, int t);
+    std::string objtype(){
+        return "Triangle";
+    }
 };
 
 class MeshTriangle : public Object
@@ -149,6 +153,9 @@ public:
     }
 
     Bounds3 getBounds() { return bounding_box; }
+    std::string objtype(){
+        return "MeshTriangle";
+    }
 
     void getSurfaceProperties(const Vector3f& P, const Vector3f& I,
                               const uint32_t& index, const Vector2f& uv,
@@ -206,8 +213,11 @@ inline bool Triangle::intersect(const Ray& ray, float& tnear,
     return false;
 }
 
+// 对三角形求bound并返回
 inline Bounds3 Triangle::getBounds() { return Union(Bounds3(v0, v1), v2); }
 
+// s=o-p0, s1=pvec, s2=qvec;
+// e1、e2在三角形初始化时已经算好
 inline Intersection Triangle::getIntersection(Ray ray)
 {
     Intersection inter;
@@ -232,9 +242,7 @@ inline Intersection Triangle::getIntersection(Ray ray)
     t_tmp = dotProduct(e2, qvec) * det_inv;
 
     // TODO find ray triangle intersection
-
-
-
+    setIntersection(inter, u, v, t_tmp);
 
     return inter;
 }
@@ -242,4 +250,13 @@ inline Intersection Triangle::getIntersection(Ray ray)
 inline Vector3f Triangle::evalDiffuseColor(const Vector2f&) const
 {
     return Vector3f(0.5, 0.5, 0.5);
+}
+
+void Triangle::setIntersection(Intersection& inter, int u, int v, int t){
+    inter.happened = true;
+    inter.coords = (1-u-v)*v0 + u*v1 + v*v2;
+    inter.normal = normal;
+    inter.distance = t;
+    inter.obj = this;
+    inter.m = m;
 }

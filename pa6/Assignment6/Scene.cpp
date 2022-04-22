@@ -55,6 +55,7 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
     if (depth > this->maxDepth) {
         return Vector3f(0.0,0.0,0.0);
     }
+    // 此处为最外层，检测是否和场景中的物体所在框相交
     Intersection intersection = Scene::intersect(ray);
     Material *m = intersection.m;
     Object *hitObject = intersection.obj;
@@ -62,6 +63,7 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
 //    float tnear = kInfinity;
     Vector2f uv;
     uint32_t index = 0;
+    // BVHs作为预检验
     if(intersection.happened) {
 
         Vector3f hitPoint = intersection.coords;

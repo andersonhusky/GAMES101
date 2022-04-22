@@ -46,6 +46,7 @@ public:
     std::vector<Object*> primitives;
 };
 
+// 应该为BVH的二叉树存储结构
 struct BVHBuildNode {
     Bounds3 bounds;
     BVHBuildNode *left;

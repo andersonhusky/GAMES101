@@ -75,6 +75,9 @@ public:
         return Bounds3(Vector3f(center.x-radius, center.y-radius, center.z-radius),
                        Vector3f(center.x+radius, center.y+radius, center.z+radius));
     }
+    std::string objtype(){
+        return"Sphere";
+    }
 };
 
 

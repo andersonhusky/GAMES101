@@ -2,6 +2,7 @@
 #include <cassert>
 #include "BVH.hpp"
 
+// 创建bunny的时候会调用一次，场景设置完毕时会调用一次
 BVHAccel::BVHAccel(std::vector<Object*> p, int maxPrimsInNode,
                    SplitMethod splitMethod)
     : maxPrimsInNode(std::min(255, maxPrimsInNode)), splitMethod(splitMethod),
@@ -30,6 +31,7 @@ BVHBuildNode* BVHAccel::recursiveBuild(std::vector<Object*> objects)
     BVHBuildNode* node = new BVHBuildNode();
 
     // Compute bounds of all primitives in BVH node
+    // 最大的为拆分的bounds
     Bounds3 bounds;
     for (int i = 0; i < objects.size(); ++i)
         bounds = Union(bounds, objects[i]->getBounds());
@@ -49,10 +51,12 @@ BVHBuildNode* BVHAccel::recursiveBuild(std::vector<Object*> objects)
         return node;
     }
     else {
+        // 为包括所有三角形中心的bound
         Bounds3 centroidBounds;
         for (int i = 0; i < objects.size(); ++i)
             centroidBounds =
                 Union(centroidBounds, objects[i]->getBounds().Centroid());
+        // 得到对角线向量中最大的维度
         int dim = centroidBounds.maxExtent();
         switch (dim) {
         case 0:
@@ -84,6 +88,7 @@ BVHBuildNode* BVHAccel::recursiveBuild(std::vector<Object*> objects)
 
         assert(objects.size() == (leftshapes.size() + rightshapes.size()));
 
+        // 按照最长的维度划分为左右两组，递归构造
         node->left = recursiveBuild(leftshapes);
         node->right = recursiveBuild(rightshapes);
 
@@ -105,5 +110,17 @@ Intersection BVHAccel::Intersect(const Ray& ray) const
 Intersection BVHAccel::getIntersection(BVHBuildNode* node, const Ray& ray) const
 {
     // TODO Traverse the BVH to find intersection
+    Intersection inter1, inter2;
+    if(!node)   return inter1;
 
+    std::array<int, 3> dirIsNeg;
+    if(!node->bounds.IntersectP(ray, ray.direction_inv, dirIsNeg)) return inter1;
+
+    if(!node->left && !node->right){
+        return node->object->getIntersection(ray);
+    }
+
+    inter1 = getIntersection(node->left, ray);
+    inter2 = getIntersection(node->right, ray);
+    return inter1.distance<inter2.distance? inter1: inter2;
 }

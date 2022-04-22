@@ -15,9 +15,11 @@ int main(int argc, char** argv)
 
     MeshTriangle bunny("../models/bunny/bunny.obj");
 
+    // 添加物体和光源，构建BVH类
     scene.Add(&bunny);
     scene.Add(std::make_unique<Light>(Vector3f(-20, 70, 20), 1));
     scene.Add(std::make_unique<Light>(Vector3f(20, 70, 20), 1));
+    // 对所有物体建立BVH
     scene.buildBVH();
 
     Renderer r;
