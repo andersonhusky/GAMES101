@@ -27,3 +27,4 @@
 
 22/04/22 完成作业6：小兔子渲染结果如下
 <img width="800" height="600" src="https://github.com/andersonhusky/GAMES101/blob/main/pa6/Assignment6/image/bunny_result.png" alt="bunny"/>  
+TODO: SAH方法学习和编写
