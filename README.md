@@ -24,3 +24,6 @@
 
 22/04/19 完成作业5：光线追踪结果如下
 <img width="800" height="600" src="https://github.com/andersonhusky/GAMES101/blob/main/pa5/Code/image/%E6%B8%B2%E6%9F%93%E7%BB%93%E6%9E%9C.png" alt="compare"/>  
+
+22/04/22 完成作业6：小兔子渲染结果如下
+<img width="800" height="600" src="https://github.com/andersonhusky/GAMES101/blob/main/pa6/Assignment6/image/bunny_result.png" alt="bunny"/>  
