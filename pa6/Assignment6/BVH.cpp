@@ -90,8 +90,9 @@ BVHBuildNode* BVHAccel::recursiveBuild(std::vector<Object*> objects, bool SAH)
         std::vector<Object *>::iterator beginning = objects.begin();
         std::vector<Object *>::iterator ending = objects.end();
         std::vector<Object *>::iterator middling = objects.begin();
-        int N = 12;
-        if(SAH && objects.size()>4){
+        int N = 25;
+        if(objects.size()<=N)   N = std::max(2, int(objects.size()/2));
+        if(SAH){
             std::vector<Bounds3> Buckets(N, Bounds3());
             Bounds3 testbound;
             std::vector<int> BucketsNums(N, 0);

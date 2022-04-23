@@ -24,6 +24,7 @@ int main(int argc, char** argv)
 
     Renderer r;
 
+    typedef std::chrono::duration<int, std::milli> milliseconds_type;
     auto start = std::chrono::system_clock::now();
     r.Render(scene);
     auto stop = std::chrono::system_clock::now();
@@ -32,6 +33,7 @@ int main(int argc, char** argv)
     std::cout << "Time taken: " << std::chrono::duration_cast<std::chrono::hours>(stop - start).count() << " hours\n";
     std::cout << "          : " << std::chrono::duration_cast<std::chrono::minutes>(stop - start).count() << " minutes\n";
     std::cout << "          : " << std::chrono::duration_cast<std::chrono::seconds>(stop - start).count() << " seconds\n";
+    std::cout << "          : " << std::chrono::duration_cast<milliseconds_type>(stop-start).count() << " milliseconds\n";
 
     return 0;
 }
