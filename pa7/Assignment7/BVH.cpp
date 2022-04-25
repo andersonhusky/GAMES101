@@ -108,7 +108,23 @@ Intersection BVHAccel::Intersect(const Ray& ray) const
 Intersection BVHAccel::getIntersection(BVHBuildNode* node, const Ray& ray) const
 {
     // TODO Traverse the BVH to find intersection
+    Intersection inter1, inter2;
+    if(!node)   return inter1;
 
+    std::array<int, 3> dirIsNeg;
+    dirIsNeg[0] = int(ray.direction.x >= 0);
+	dirIsNeg[1] = int(ray.direction.y >= 0);
+	dirIsNeg[2] = int(ray.direction.z >= 0);
+
+    if(!node->bounds.IntersectP(ray, ray.direction_inv, dirIsNeg)) return inter1;
+
+    if(!node->left && !node->right){
+        return node->object->getIntersection(ray);
+    }
+
+    inter1 = getIntersection(node->left, ray);
+    inter2 = getIntersection(node->right, ray);
+    return inter1.distance<inter2.distance? inter1: inter2;
 }
 
 
@@ -122,6 +138,7 @@ void BVHAccel::getSample(BVHBuildNode* node, float p, Intersection &pos, float &
     else getSample(node->right, p - node->left->area, pos, pdf);
 }
 
+// 对于由多个三角形构成的光源，定位随机点在哪个三角形上
 void BVHAccel::Sample(Intersection &pos, float &pdf){
     float p = std::sqrt(get_random_float()) * root->area;
     getSample(root, p, pos, pdf);

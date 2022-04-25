@@ -84,6 +84,7 @@ public:
     bool hasEmit(){
         return m->hasEmission();
     }
+    void setIntersection(Intersection& inter, int u, int v, int t);
 };
 
 class MeshTriangle : public Object
@@ -253,6 +254,7 @@ inline Intersection Triangle::getIntersection(Ray ray)
     t_tmp = dotProduct(e2, qvec) * det_inv;
 
     // TODO find ray triangle intersection
+    setIntersection(inter, u, v, t_tmp);
 
     return inter;
 }
@@ -260,4 +262,13 @@ inline Intersection Triangle::getIntersection(Ray ray)
 inline Vector3f Triangle::evalDiffuseColor(const Vector2f&) const
 {
     return Vector3f(0.5, 0.5, 0.5);
+}
+
+void Triangle::setIntersection(Intersection& inter, int u, int v, int t){
+    inter.happened = true;
+    inter.coords = (1-u-v)*v0 + u*v1 + v*v2;
+    inter.normal = normal;
+    inter.distance = t;
+    inter.obj = this;
+    inter.m = m;
 }

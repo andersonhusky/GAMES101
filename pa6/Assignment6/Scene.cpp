@@ -63,7 +63,6 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
 //    float tnear = kInfinity;
     Vector2f uv;
     uint32_t index = 0;
-    // BVHs作为预检验
     if(intersection.happened) {
 
         Vector3f hitPoint = intersection.coords;

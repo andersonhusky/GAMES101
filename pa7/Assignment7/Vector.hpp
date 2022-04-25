@@ -34,7 +34,8 @@ public:
     friend std::ostream & operator << (std::ostream &os, const Vector3f &v)
     { return os << v.x << ", " << v.y << ", " << v.z; }
     double       operator[](int index) const;
-    double&      operator[](int index);
+    float&      operator[](int index);
+    bool operator == (const Vector3f & v){ return (v.x==x && v.y==y && v.z==z);}
 
 
     static Vector3f Min(const Vector3f &p1, const Vector3f &p2) {
@@ -49,6 +50,10 @@ public:
 };
 inline double Vector3f::operator[](int index) const {
     return (&x)[index];
+}
+
+inline float& Vector3f::operator[](int index){
+    return *((&x)+index);
 }
 
 
