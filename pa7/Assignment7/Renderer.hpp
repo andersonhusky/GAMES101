@@ -16,6 +16,8 @@ class Renderer
 {
 public:
     void Render(const Scene& scene);
+    void static RenderTh(std::vector<Vector3f> &framebuffer, const Scene &scene, int startH, int endH, int spp);
+    void BuildThread(const Scene& scene);
 
 private:
 };

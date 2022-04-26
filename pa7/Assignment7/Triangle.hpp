@@ -254,7 +254,13 @@ inline Intersection Triangle::getIntersection(Ray ray)
     t_tmp = dotProduct(e2, qvec) * det_inv;
 
     // TODO find ray triangle intersection
-    setIntersection(inter, u, v, t_tmp);
+    if(t_tmp<=0)    return inter;
+	inter.happened = true;
+	inter.coords = ray(t_tmp);
+	inter.m = this->m;
+	inter.normal = normal;
+	inter.distance = t_tmp;
+	inter.obj = this;
 
     return inter;
 }
@@ -266,9 +272,9 @@ inline Vector3f Triangle::evalDiffuseColor(const Vector2f&) const
 
 void Triangle::setIntersection(Intersection& inter, int u, int v, int t){
     inter.happened = true;
-    inter.coords = (1-u-v)*v0 + u*v1 + v*v2;
+    inter.coords = (1-u-v)*this->v0 + u*this->v1 + v*this->v2;
     inter.normal = normal;
     inter.distance = t;
     inter.obj = this;
-    inter.m = m;
+    inter.m = this->m;
 }

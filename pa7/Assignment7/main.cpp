@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 
     typedef std::chrono::duration<int, std::milli> milliseconds_type;
     auto start = std::chrono::system_clock::now();
-    r.Render(scene);
+    r.BuildThread(scene);
     auto stop = std::chrono::system_clock::now();
 
     std::cout << "Render complete: \n";

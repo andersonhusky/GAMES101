@@ -124,7 +124,7 @@ Intersection BVHAccel::getIntersection(BVHBuildNode* node, const Ray& ray) const
 
     inter1 = getIntersection(node->left, ray);
     inter2 = getIntersection(node->right, ray);
-    return inter1.distance<inter2.distance? inter1: inter2;
+    return inter1.distance<=inter2.distance? inter1: inter2;
 }
 
 
