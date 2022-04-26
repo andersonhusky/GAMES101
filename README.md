@@ -32,4 +32,4 @@
 <img width="600" height="200" src="https://github.com/andersonhusky/GAMES101/blob/main/pa6/Assignment6/image/SAH%E5%8A%A0%E9%80%9F_%E6%A1%B6%E5%A4%A7%E5%B0%8F25.png" alt="SAH加速_桶大小25"/>  
 
 22/04/26 完成作业7：spp=128渲染结果如下
-<img width="800" height="600" src="https://github.com/andersonhusky/GAMES101/blob/main/pa6/Assignment6/image/bunny_result.png" alt="bunny"/>  
+<img width="800" height="600" src="https://github.com/andersonhusky/GAMES101/blob/main/pa7/Assignment7/images/ssp128%E6%9C%80%E7%BB%88.png" alt="result"/>  
