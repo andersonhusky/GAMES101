@@ -104,7 +104,7 @@ void Renderer::RenderTh(std::vector<Vector3f> &framebuffer, const Scene &scene, 
 }
 
 void Renderer::BuildThread(const Scene& scene){
-    int spp=16;
+    int spp=128;
     std::cout << "SPP: " << spp << "\n";
 
     int NUM_THREADS = std::thread::hardware_concurrency();
