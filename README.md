@@ -30,3 +30,6 @@
 22/04/23 完成作业6SAH编写：对比结果如下，桶大小取25是最好的  
 <img width="600" height="200" src="https://github.com/andersonhusky/GAMES101/blob/main/pa6/Assignment6/image/%E6%9C%AASAH%E5%8A%A0%E9%80%9F.png" alt="未SAH"/>  
 <img width="600" height="200" src="https://github.com/andersonhusky/GAMES101/blob/main/pa6/Assignment6/image/SAH%E5%8A%A0%E9%80%9F_%E6%A1%B6%E5%A4%A7%E5%B0%8F25.png" alt="SAH加速_桶大小25"/>  
+
+22/04/26 完成作业7：spp=128渲染结果如下
+<img width="800" height="600" src="https://github.com/andersonhusky/GAMES101/blob/main/pa6/Assignment6/image/bunny_result.png" alt="bunny"/>  
