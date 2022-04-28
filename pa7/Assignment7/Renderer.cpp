@@ -30,14 +30,14 @@ void Renderer::Render(const Scene& scene)
 
     // change the spp value to change sample ammount
     // 采样数量
-    int spp = 32;
+    int spp = 128;
     std::cout << "SPP: " << spp << "\n";
     for (uint32_t j = 0; j < scene.height; ++j) {
         for (uint32_t i = 0; i < scene.width; ++i) {
             // generate primary ray direction
-            float x = (2 * (i + 0.5) / (float)scene.width - 1) *
+            float x = (2 * (i + get_random_float()) / (float)scene.width - 1) *
                       imageAspectRatio * scale;
-            float y = (1 - 2 * (j + 0.5) / (float)scene.height) * scale;
+            float y = (1 - 2 * (j + get_random_float()) / (float)scene.height) * scale;
 
             Vector3f dir = normalize(Vector3f(-x, y, 1));
             // 执行spp次光线追踪
